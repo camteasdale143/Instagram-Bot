@@ -1,11 +1,12 @@
+const findAndFollowAllFlaggedAccountFollowers = require('./src/findAndFollowAllFlaggedAccountFollowers');
+const followBackAllFollowers = require('./src/followBackAllFollowers');
+const followIndividual = require('./src/followIndividual');
+const determineIfBot = require('./src/determineIfBot');
+const likeFeed = require('./src/likeFeed');
 const loginInfo = require('./loginInfo');
-const log = require('./src/log');
 const launch = require('./src/launch');
 const login = require('./src/login');
-const followIndividual = require('./src/followIndividual');
-const followBackAllFollowers = require('./src/followBackAllFollowers');
-const findAndFollowAllFlaggedAccountFollowers = require('./src/findAndFollowAllFlaggedAccountFollowers');
-const likeFeed = require('./src/likeFeed');
+const log = require('./src/log');
 
 let browserInfo = {};
 let loggedIn = true;
@@ -30,7 +31,8 @@ async function headless() {
     // await followBackAllFollowers(browserInfo.page);
     //  await findAndFollowAllFlaggedAccountFollowers(browserInfo);
     // await followIndividual(browserInfo, 'beyonce');
-    await likeFeed(browserInfo);
+    // await likeFeed(browserInfo);
+    await determineIfBot();
   } else {
     log('failed to login, closing program for credential revision');
     await browserInfo.browser.close();
