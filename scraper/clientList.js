@@ -1,7 +1,1 @@
-module.exports = [
-  'rawleyresort',
-  'beyonce',
-  'm_phelps00',
-  'johncena',
-  'hm'
-]
+module.exports = ['rawleyresort', 'beyonce', 'm_phelps00', 'johncena', 'hm'];

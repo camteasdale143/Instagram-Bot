@@ -1,29 +1,29 @@
 const typeElement = require('./typeElement');
+const log = require('./log');
 
 function getAsterisks(password) {
-  var asterisks = '';
-  for (var i = 0; i < password.length; i++) {
-    asterisks = asterisks + '*'
+  let asterisks = '';
+  for (let i = 0; i < password.length; i += 1) {
+    asterisks += '*';
   }
-  return asterisks
+  return asterisks;
 }
 
-module.exports = async function enterCredentials({page, frame}, {username, password}) {
-  try{
-    console.log(`typing username - ${username}`);
-    await typeElement({page, frame}, '[name=username]', username)
-    console.log(`typing password - ${getAsterisks(password)}`);
-    await typeElement({page, frame}, '[name=password]',password )
-    console.log('logging in');
+module.exports = async function enterCredentials({ page, frame }, { username, password }) {
+  try {
+    log(`typing username - ${username}`);
+    await typeElement({ page, frame }, '[name=username]', username);
+    log(`typing password - ${getAsterisks(password)}`);
+    await typeElement({ page, frame }, '[name=password]', password);
+    log('logging in');
     const logInButtonHandler = await page.$x('//button[contains(text(), "Log in")]');
     await logInButtonHandler[0].click();
-    await page.waitForNavigation({timeout: 10000});
-    if (await frame.$(`#slfErrorAlert`)){
-       throw 'incorrect login credentials'
+    await page.waitForNavigation({ timeout: 10000 });
+    if (await frame.$('#slfErrorAlert')) {
+      throw new Error('incorrect login credentials');
     }
-  }
-  catch(err) {
-    return false
+  } catch (err) {
+    return false;
   }
 
   await page.keyboard.press('Escape');
@@ -32,5 +32,5 @@ module.exports = async function enterCredentials({page, frame}, {username, passw
     await stopNotifications[0].click();
   }
 
-  return true
-}
+  return true;
+};
