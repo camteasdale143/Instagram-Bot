@@ -1,7 +1,7 @@
 const typeElement = require('./typeElement');
 
 
-module.exports = async function findUser({page, frame}, pageName) {
+module.exports = async function findUserPage({page, frame}, pageName) {
   console.log(`Searching for the account named ${pageName}`);
   await typeElement({page, frame}, '[placeholder=Search]', pageName)
   console.log('clicking on first search result of the search results')

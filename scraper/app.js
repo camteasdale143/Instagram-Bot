@@ -1,105 +1,110 @@
 const fs = require('fs');
-const url = 'https://www.instagram.com/accounts/login/?hl=en';
+
 const loginInfo = require('./loginInfo');
 const flaggedAccounts = require('./clientList');
 const launch = require('./src/launch');
 const login = require('./src/login');
-const findUser = require('./src/findUser');
+const findUserPage = require('./src/findUserPage');
 const typeElement = require('./src/typeElement');
 var Writable = require('stream').Writable;
 
 
-
 const readline = require('readline');
-
-
-
 var followsRemaining = 50
 var browserInfo = {};
+var loggedIn = true;
+
 
 async function headless() {
-
-  browserInfo = await launch(url);
+  browserInfo = await launch();
   browserInfo.frame = browserInfo.page.mainFrame();
-  if (await login(browserInfo, loginInfo) ){
-    fs.writeFile('sc.png', await sc(browserInfo.page))
-
-    for (var i = 0; i < flaggedAccounts.length - 1; i++) {
-      await findUser(browserInfo, flaggedAccounts[i]);
-      await followNewUsers(browserInfo);
-    }
-
-    await browserInfo.browser.close();
-    console.log('done')
+  if (browserInfo.needToLogin) {
+    loggedIn = await login(browserInfo, loginInfo)
+  }
+  if (loggedIn){
+    // THINGS TO DO WHEN LOGGED IN
+    // - follow new followers back
+    // await followBackAllFollowers(browserInfo.page)
+    // - analyse and follow accounts of other businesses
+    // - check comments and send to nlp to understand their priority in responding
+    // - try to respond to some comments
+    // - like some of things on feed
+    // - if one account is really liked, super like and like the accounts last 3 posts
+    // await followAllFlaggedAccountFollowers();
+    await followIndividual('beyonce')
   }
   else {
     console.log('failed to login, closing program for credential revision')
     await browserInfo.browser.close();
   }
-
-
 }
 
+async function followAllFlaggedAccountFollowers() {
+  for (var i = 0; i < flaggedAccounts.length - 1; i++) {
+    await findAccountAndFollowAllFollowers(i)
+  }
+  browserInfo.page.click('[href="/"]')
+}
 
+async function findAccountAndFollowAllFollowers(i) {
+  await findUserPage(browserInfo, flaggedAccounts[i]);
+  await followNewUsers(browserInfo);
+}
 
-async function AskForloginCredentials(fieldName) {
-  return new Promise((resolve, reject) => {
-    var mutableStdout = new Writable({
-      write: function(chunk, encoding, callback) {
-        if (!this.muted)
-          process.stdout.write(chunk, encoding);
-        callback();
+async function closeBrowser() {
+  await browserInfo.browser.close();
+}
+
+async function followBackAllFollowers(page){
+  page.click('[href="/accounts/activity/"]')
+  await page.waitFor(2000)
+  await page.evaluate(() => {
+    var numberOfPeopleFollowed = 0;
+    const elements = document.querySelectorAll('button.L3NKy');
+    elements.forEach(button => {
+      if (button.innerText === 'Follow'){
+        button.click();
+        numberOfPeopleFollowed += 1;
       }
     });
-
-    mutableStdout.muted = false;
-
-    var rl = readline.createInterface({
-      input: process.stdin,
-      output: mutableStdout,
-      terminal: true
-    });
-
-    rl.question('Password: ', function(password) {
-      console.log('\nPassword is ' + password);
-      rl.close();
-    });
-    mutableStdout.muted = true;
-
-
-  })
-
-
-
-
+    console.log(`followed back ${numberOfPeopleFollowed} people`)
+  });
 }
-
 
 
 async function followNewUsers({page, frame}) {
   console.log('clicking the followers button');
-  await sc(page);
   await frame.click('a.-nal3 :first-child');
-  await sc(page);
   await page.waitFor(2000);
-  var unfollowedNum = await frame.$$eval('button.L3NKy:not(._8A5w5)', buttons => buttons.length);
-  while (unfollowedNum > 1 || followsRemaining > 0) {
-    for (var i = 1; i<unfollowedNum; i++) {
-      if (await frame.$(`button.L3NKy:not(._8A5w5):first-child`)) {
-        console.log(`clicking ${i} of ${unfollowedNum}`)
-        await frame.click(`button.L3NKy:not(._8A5w5):first-child`);
-        await page.waitFor(500);
-        followsRemaining -= 1;
-      }
-      console.log(followsRemaining)
-      await sc(page);
-    }
-    unfollowedNum = await frame.$$eval('button.L3NKy:not(._8A5w5)', buttons => buttons.length)
 
-  }
+  await page.evaluate(() => {
+    var numberOfPeopleFollowed = 0;
+    const elements = document.querySelectorAll('button.L3NKy:not(._8A5w5)');
+    elements.forEach(button => {
+      if (button.innerText === 'Follow'){
+        button.click();
+        numberOfPeopleFollowed += 1;
+      }
+    });
+    console.log(`followed ${numberOfPeopleFollowed} people`)
+  })
+  await page.waitFor(2000);
   await page.keyboard.press('Escape');
 }
 
+async function followIndividual(name) {
+  findUserPage(browserInfo, name);
+  browserInfo.page.waitFor(2000);
+  browserInfo.page.evaluate(() => {
+    console.log(document.querySelector('button'))
+    if (document.querySelector('button.yZn4P')) {
+      document.querySelector('button.yZn4P').click();
+    }
+    else {
+      console.log('something went wrong')
+    }
+  })
+}
 
 
 async function sc(page) {
