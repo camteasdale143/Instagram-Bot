@@ -6,6 +6,7 @@ const launch = require('./src/launch');
 const login = require('./src/login');
 const findUserPage = require('./src/findUserPage');
 const typeElement = require('./src/typeElement');
+const followIndividual = require('./src/followIndividual');
 var Writable = require('stream').Writable;
 
 
@@ -24,14 +25,16 @@ async function headless() {
   if (loggedIn){
     // THINGS TO DO WHEN LOGGED IN
     // - follow new followers back
-    // await followBackAllFollowers(browserInfo.page)
+    await browserInfo.page.keyboard.press('Escape');
+
     // - analyse and follow accounts of other businesses
     // - check comments and send to nlp to understand their priority in responding
     // - try to respond to some comments
     // - like some of things on feed
     // - if one account is really liked, super like and like the accounts last 3 posts
+    // await followBackAllFollowers(browserInfo.page)
     // await followAllFlaggedAccountFollowers();
-    await followIndividual('beyonce')
+    await followIndividual(browserInfo, 'beyonce')
   }
   else {
     console.log('failed to login, closing program for credential revision')
@@ -56,14 +59,30 @@ async function closeBrowser() {
 }
 
 async function followBackAllFollowers(page){
-  page.click('[href="/accounts/activity/"]')
+  await page.evaluate(() => document.querySelector('[href="/accounts/activity/"]').click());
   await page.waitFor(2000)
+  await page.waitFor(() => document
+    .querySelector('[href="/accounts/activity/"]')
+    .parentNode
+    .querySelector('[role=dialog]')
+    .parentNode
+    .querySelectorAll('[role=button]').length);
   await page.evaluate(() => {
     var numberOfPeopleFollowed = 0;
-    const elements = document.querySelectorAll('button.L3NKy');
-    elements.forEach(button => {
-      if (button.innerText === 'Follow'){
-        button.click();
+    const targetedNodes = document
+      .querySelector('[href="/accounts/activity/"]')
+      .parentNode
+      .querySelector('[role=dialog]')
+      .parentNode
+      .querySelectorAll('[role=button]');
+
+    targetedNodes.forEach((el, index) => {
+      if (!targetedNodes[index].querySelector('button')) {
+        return
+      }
+      const btnText = targetedNodes[index].querySelector('button').innerText
+      if (btnText && btnText === 'Follow'){
+        targetedNodes[index].querySelector('button').click();
         numberOfPeopleFollowed += 1;
       }
     });
@@ -92,19 +111,7 @@ async function followNewUsers({page, frame}) {
   await page.keyboard.press('Escape');
 }
 
-async function followIndividual(name) {
-  findUserPage(browserInfo, name);
-  browserInfo.page.waitFor(2000);
-  browserInfo.page.evaluate(() => {
-    console.log(document.querySelector('button'))
-    if (document.querySelector('button.yZn4P')) {
-      document.querySelector('button.yZn4P').click();
-    }
-    else {
-      console.log('something went wrong')
-    }
-  })
-}
+
 
 
 async function sc(page) {
