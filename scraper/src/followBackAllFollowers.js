@@ -1,3 +1,5 @@
+// const log = require('./log');
+
 module.exports = async function followBackAllFollowers(page) {
   await page.evaluate(() => document.querySelector('[href="/accounts/activity/"]').click());
   await page.waitFor(2000);
