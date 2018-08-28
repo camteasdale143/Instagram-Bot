@@ -1,7 +1,9 @@
-const findAndFollowAllFlaggedAccountFollowers = require('./src/findAndFollowAllFlaggedAccountFollowers');
+const findAllFlaggedAccountFollowers = require('./src/findAndFollowAllFlaggedAccountFollowers');
+const followAllFlaggedAccountFollowers = require('./src/followAllFlaggedAccountFollowers');
 const followBackAllFollowers = require('./src/followBackAllFollowers');
 const followIndividual = require('./src/followIndividual');
 const determineIfBot = require('./src/determineIfBot');
+const findUserPage = require('./src/findUserPage');
 const likeFeed = require('./src/likeFeed');
 const loginInfo = require('./loginInfo');
 const launch = require('./src/launch');
@@ -21,18 +23,17 @@ async function headless() {
     // THINGS TO DO WHEN LOGGED IN
     // - follow new followers back
     await browserInfo.page.keyboard.press('Escape');
-    // - intercept outgoing json requests to analyse data for account names...
-    // - detect spam accounts and don't follow them
-    // - analyse and follow accounts of other businesses
-    // - check comments and send to nlp to understand their priority in responding
-    // - try to respond to some comments
-    // - like some of things on feed
-    // - if one account is really liked, super like and like the accounts last 3 posts
+
     // await followBackAllFollowers(browserInfo.page);
-    //  await findAndFollowAllFlaggedAccountFollowers(browserInfo);
+    await likeFeed(browserInfo);
+
+    // await findAllFlaggedAccountFollowers(browserInfo);
+    // await followAllFlaggedAccountFollowers(browserInfo);
+
+    // await findUserPage(browserInfo, 'beyonce');
     // await followIndividual(browserInfo, 'beyonce');
-    // await likeFeed(browserInfo);
-    await determineIfBot();
+
+    // log(await determineIfBot(browserInfo, 'beyonce'));
   } else {
     log('failed to login, closing program for credential revision');
     await browserInfo.browser.close();

@@ -8,18 +8,6 @@ const url = 'https://www.instagram.com/accounts/login/?hl=en';
 
 const needToLogin = true;
 
-// function getRandFileName() {
-//   return (
-//     `./jsonData/${
-//       String.fromCharCode(97 + rng(26))
-//     }${String.fromCharCode(97 + rng(26))
-//     }${String.fromCharCode(97 + rng(26))
-//     }${String.fromCharCode(97 + rng(26))
-//     }${String.fromCharCode(97 + rng(26))
-//     }${String.fromCharCode(97 + rng(26))
-//     }.json`
-//   );
-// }
 module.exports = async () => {
   log('launching browser');
   const browser = await puppeteer.launch({
