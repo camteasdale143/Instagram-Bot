@@ -24,11 +24,11 @@ async function headless() {
     // - follow new followers back
     await browserInfo.page.keyboard.press('Escape');
 
-    await followBackAllFollowers(browserInfo.page);
+    // await followBackAllFollowers(browserInfo.page);
     // wait likeFeed(browserInfo);
 
     // await findAllFlaggedAccountFollowers(browserInfo);
-    // await followAllFlaggedAccountFollowers(browserInfo);
+    await followAllFlaggedAccountFollowers(browserInfo);
 
     // await findUserPage(browserInfo, 'beyonce');
     // await followIndividual(browserInfo, 'beyonce');
