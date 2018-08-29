@@ -24,8 +24,8 @@ async function headless() {
     // - follow new followers back
     await browserInfo.page.keyboard.press('Escape');
 
-    // await followBackAllFollowers(browserInfo.page);
-    await likeFeed(browserInfo);
+    await followBackAllFollowers(browserInfo.page);
+    // wait likeFeed(browserInfo);
 
     // await findAllFlaggedAccountFollowers(browserInfo);
     // await followAllFlaggedAccountFollowers(browserInfo);

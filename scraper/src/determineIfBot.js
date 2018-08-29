@@ -3,8 +3,19 @@ const findUserPage = require('./findUserPage');
 
 module.exports = async function determineIfBot({ page, frame }, pageName) {
   await page.waitForSelector('header > section > div > h1');
-  accountInfo = await parsePageInformation(page, pageName);
-  let nameData = await axios({
+  await page.waitFor(1000);
+  const accountInfo = await parsePageInformation(page, pageName);
+
+  let nameData = {};
+  if (accountInfo.firstName) {
+    accountInfo.firstName = accountInfo.firstName
+      .split('')
+      .filter(char => char.charCodeAt() < 176)
+      .join('');
+  }
+
+  console.log(accountInfo.firstName);
+  nameData = await axios({
     method: 'get',
     url: `http://www.behindthename.com/api/lookup.json?name=%20${
       accountInfo.firstName
@@ -12,16 +23,16 @@ module.exports = async function determineIfBot({ page, frame }, pageName) {
   });
   nameData = nameData.data;
 
-  let isBot = 4; // scale of 1 - 10, 0 is a human, 10 is a bot
+  let isBot = 4;
   let isBusiness = 4;
 
   accountInfo.posts === 0 ? isBot + 2 : null;
-  accountInfo.followers / accountInfo.following < 0.65 ? (isBusiness += 2) : null;
+  accountInfo.followers / accountInfo.following < 0.5 ? (isBusiness += 2) : null;
   accountInfo.followers / accountInfo.following < 0.3 ? (isBot += 2) : null;
   nameData.error_code === 50 ? (isBusiness += 2) : null;
   accountInfo.verified ? (isBot = 0) : null;
-  accountInfo.isPrivate ? (isBot = 0) : null;
-
+  accountInfo.isPrivate ? ((isBot = 0), (isBusiness = 0)) : null;
+  console.log({ isBot, isBusiness });
   return {
     isBot: isBot > 5,
     isBusiness: isBusiness > 5,
@@ -65,8 +76,13 @@ async function parsePageInformation(page, pageName) {
     verified ? (verified = true) : (verified = false);
 
     const fullName = document.querySelector('section').querySelectorAll('h1');
-    const splitName = fullName[1].innerText.split(' ');
-    const firstName = splitName[0];
+    let splitName;
+    let firstName;
+    if (fullName.length > 1 && fullName[1].innerText) {
+      splitName = fullName[1].innerText.split(' ');
+      firstName = splitName[0];
+    }
+
     return {
       posts,
       followers,

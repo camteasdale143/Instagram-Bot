@@ -29,7 +29,9 @@ module.exports = async function enterCredentials({ page, frame }, { username, pa
   await page.keyboard.press('Escape');
   if (await frame.$('[role=dialog]')) {
     const stopNotifications = await page.$x('//button[contains(text(), "Not Now")]');
-    await stopNotifications[0].click();
+    if (stopNotifications[0]) {
+      await stopNotifications[0].click();
+    }
   }
 
   return true;

@@ -12,11 +12,41 @@ async function followAllAccountFollowers({ page, frame }, pageName) {
   console.log('loaded');
 
   await page.click('div > ul > div > li');
-  for (let i = 0; i < 10; i++) {
+  let followers = await page.evaluate((pageName) => {
+    const followersSpan = document
+      .querySelector(`a[href="/${pageName}/followers/"]`)
+      .querySelector('span');
+    let followers = '';
+    if (followersSpan) {
+      followers = followersSpan.innerText;
+    }
+    followers = followers.split(',').join('');
+
+    const lastChar = followers.split('')[followers.length - 1];
+    if (lastChar === 'k') {
+      followers = followers
+        .split('')
+        .pop()
+        .push('000')
+        .join('');
+    }
+    if (lastChar === 'm') {
+      followers = followers
+        .split('')
+        .pop()
+        .push('000000')
+        .join('');
+    }
+    return parseInt(followers);
+  }, pageName);
+  console.log(followers);
+  if (followers > 1075) {
+    followers = 1075;
+  }
+  for (let i = 0; i < Math.floor(followers / 5); i++) {
     await page.keyboard.press('Space');
     await page.waitFor(1000);
-
-    console.log(i);
+    console.log(`${i} of ${Math.floor(followers / 5)} scrolls`);
   }
 
   const accountsToFollow = await page.evaluate(() => {

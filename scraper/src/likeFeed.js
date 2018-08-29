@@ -1,7 +1,5 @@
 module.exports = async function likeFeed({ page, frame }) {
   console.log('keydown');
-  await page.click('[href="/"]');
-  await page.waitForNavigation();
   for (let i = 0; i < 21; i += 1) {
     await page.keyboard.press('Space');
     await page.waitFor(500);
